@@ -29,7 +29,61 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'warn',
-      "prettier/prettier": ["error", { endOfLine: "auto" }],
+
+      'prettier/prettier': [
+        'error',
+        { singleQuote: true, trailingComma: 'all', endOfLine: 'auto' },
+      ],
+
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          args: 'all',
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
+      ],
+      '@typescript-eslint/no-import-type-side-effects': 'error',
+      '@typescript-eslint/no-misused-promises': [
+        'error',
+        {
+          checksVoidReturn: {
+            arguments: false,
+            attributes: false,
+            properties: false,
+          },
+        },
+      ],
+      '@typescript-eslint/require-await': 'warn',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+      '@typescript-eslint/prefer-nullish-coalescing': 'warn',
+      '@typescript-eslint/prefer-optional-chain': 'warn',
+      '@typescript-eslint/only-throw-error': 'error',
+      '@typescript-eslint/no-non-null-assertion': 'warn',
+
+      // General
+      eqeqeq: ['error', 'always', { null: 'ignore' }],
+      'no-console': 'warn',
+      'no-debugger': 'error',
+      'prefer-const': 'error',
+      'no-var': 'error',
+      curly: ['error', 'all'],
+      'object-shorthand': 'error',
+      'prefer-template': 'error',
+      'no-duplicate-imports': 'error',
+    },
+  },
+  {
+    files: ['src/database/seed.ts', 'src/migrations/**/*.ts'],
+    rules: {
+      'no-console': 'off',
     },
   },
 );

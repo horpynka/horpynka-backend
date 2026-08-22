@@ -1,4 +1,4 @@
-import { Category } from './entities/category.entity';
+import type { Category } from './entities/category.entity';
 
 export type FindAllResponse = {
   dishesCategories: Category[];

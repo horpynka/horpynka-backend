@@ -44,6 +44,6 @@ jobs:
             cd "$DEPLOY_PATH"
             git fetch origin main
             git reset --hard origin/main
-            docker compose --env-file .env.production -f docker-compose.prod.yaml build
-            docker compose --env-file .env.production -f docker-compose.prod.yaml up -d --remove-orphans
+            docker compose -f docker-compose.prod.yaml build
+            docker compose -f docker-compose.prod.yaml up -d --remove-orphans
             docker image prune -f

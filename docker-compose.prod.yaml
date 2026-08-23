@@ -1,8 +1,6 @@
 services:
   backend:
     image: horpynka-backend
-    env_file:
-      - .env.production
     build:
       context: .
       dockerfile: Dockerfile
@@ -22,8 +20,6 @@ services:
 
   db:
     image: postgres:16-alpine
-    env_file:
-      - .env.production
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_USER: ${DB_USERNAME}

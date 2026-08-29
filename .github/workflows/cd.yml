@@ -47,3 +47,22 @@ jobs:
             docker compose -f docker-compose.prod.yaml build
             docker compose -f docker-compose.prod.yaml up -d --remove-orphans
             docker image prune -f
+  autoupdate-api-sdk:
+    needs: deploy
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger API SDK autoupdate
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.API_SDK_DISPATCH_TOKEN }}
+          repository: horpynka/horpynka-api-sdk
+          event-type: autoupdate
+          client-payload: |
+            {
+              "ref": "main",
+              "triggered_by": "${{ github.repository }}",
+              "sha": "${{ github.sha }}"
+            }

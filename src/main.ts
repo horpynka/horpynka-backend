@@ -12,6 +12,11 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter(),
   );
+
+  app.enableCors({
+    origin: 'http://localhost:5173',
+  });
+
   const config = new DocumentBuilder()
     .setTitle('Horpynka API')
     .setDescription('Backend API for Horpynka POS')

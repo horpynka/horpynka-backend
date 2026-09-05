@@ -16,6 +16,9 @@ services:
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       NODE_ENV: development
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      COOKIE_SECRET: ${COOKIE_SECRET}
+      PASSWORD_HASH_SALT: ${PASSWORD_HASH_SALT}
     ports:
       - "3000:3000"
     volumes:

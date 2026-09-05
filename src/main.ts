@@ -6,6 +6,7 @@ import {
   FastifyAdapter,
   type NestFastifyApplication,
 } from '@nestjs/platform-fastify';
+import fastifyCookie from '@fastify/cookie';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -36,6 +37,9 @@ async function bootstrap() {
       transform: true, // transform payloads to be objects typed according to their DTO classes
     }),
   );
+  await app.register(fastifyCookie, {
+    secret: process.env.COOKIE_SECRET,
+  });
   await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }
 bootstrap();

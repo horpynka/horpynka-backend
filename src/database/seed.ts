@@ -53,43 +53,6 @@ async function seed() {
     `);
     console.log('Cleared existing data.');
 
-    // ── USERS ────────────────────────────────────────────────────────────────
-    const userRepo = AppDataSource.getRepository(User);
-    const users = userRepo.create([
-      {
-        email: 'admin@horpynka.com',
-        username: 'admin',
-        password: '$2b$10$hashedAdminPassword',
-        roles: ['admin'],
-      },
-      {
-        email: 'manager@horpynka.com',
-        username: 'manager',
-        password: '$2b$10$hashedManagerPassword',
-        roles: ['manager'],
-      },
-      {
-        email: 'waiter1@horpynka.com',
-        username: 'waiter_anna',
-        password: '$2b$10$hashedWaiterPassword1',
-        roles: ['waiter'],
-      },
-      {
-        email: 'waiter2@horpynka.com',
-        username: 'waiter_bohdan',
-        password: '$2b$10$hashedWaiterPassword2',
-        roles: ['waiter'],
-      },
-      {
-        email: 'cashier@horpynka.com',
-        username: 'cashier_olha',
-        password: '$2b$10$hashedCashierPassword',
-        roles: ['cashier'],
-      },
-    ]);
-    await userRepo.save(users);
-    console.log('Seeded users.');
-
     // ── CATEGORIES ───────────────────────────────────────────────────────────
     const categoryRepo = AppDataSource.getRepository(Category);
     const categories = categoryRepo.create([

@@ -11,7 +11,9 @@ import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { SignInUserDTO } from './dto/sign-in-user.dto';
 import { SignUpUserDTO } from './dto/sign-up-user.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('auth')
 @Injectable()
 export class AuthService {
   constructor(

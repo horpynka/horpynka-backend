@@ -9,9 +9,11 @@ import {
   Res,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ApiOkResponse } from '@nestjs/swagger';
 import { SignInUserDTO } from './dto/sign-in-user.dto';
 import { AuthService } from './auth.service';
 import { SignUpUserDTO } from './dto/sign-up-user.dto';
+import { AccessTokenResponseDto } from './dto/access-token-response.dto';
 import { AUTH_ROLES } from 'src/common/types/auth';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import type { FastifyRequest, FastifyReply } from 'fastify';
@@ -29,10 +31,11 @@ export class AuthController {
 
   @Post('sign-in')
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: AccessTokenResponseDto })
   async signIn(
     @Body() data: SignInUserDTO,
     @Res({ passthrough: true }) response: FastifyReply,
-  ) {
+  ): Promise<AccessTokenResponseDto> {
     const { accessToken, refreshToken } = await this.authService.signIn(data);
 
     response.setCookie('refreshToken', refreshToken, this.refreshTokenOptions);
@@ -42,10 +45,11 @@ export class AuthController {
 
   @Post('sign-up')
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: AccessTokenResponseDto })
   async signUp(
     @Body() data: SignUpUserDTO,
     @Res({ passthrough: true }) response: FastifyReply,
-  ) {
+  ): Promise<AccessTokenResponseDto> {
     const { accessToken, refreshToken } = await this.authService.signUp(data);
 
     response.setCookie('refreshToken', refreshToken, this.refreshTokenOptions);

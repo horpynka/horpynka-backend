@@ -14,7 +14,10 @@ import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Order, OrderStatus } from './entities/order.entity';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { AUTH_ROLES } from 'src/common/types/auth';
 
+@Roles(AUTH_ROLES.HORPYNKA_CASHIER_USER, AUTH_ROLES.HORPYNKA_PANEL_ADMIN)
 @ApiTags('orders')
 @Controller('orders')
 export class OrdersController {

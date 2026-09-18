@@ -14,8 +14,7 @@ import { SignInUserDTO } from './dto/sign-in-user.dto';
 import { AuthService } from './auth.service';
 import { SignUpUserDTO } from './dto/sign-up-user.dto';
 import { AccessTokenResponseDto } from './dto/access-token-response.dto';
-import { AUTH_ROLES } from 'src/common/types/auth';
-import { Roles } from 'src/common/decorators/roles.decorator';
+import { SessionResponseDto } from './dto/session-response.dto';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { CookieSerializeOptions } from '@fastify/cookie';
 
@@ -57,16 +56,31 @@ export class AuthController {
     return { accessToken };
   }
 
-  @Roles(AUTH_ROLES.HORPYNKA_CASHIER_USER, AUTH_ROLES.HORPYNKA_PANEL_ADMIN)
   @Get('refresh')
   @HttpCode(HttpStatus.OK)
-  async refresh(@Req() request: FastifyRequest, @Res() response: FastifyReply) {
-    const refreshToken = await this.authService.refreshAccessToken(
+  async refresh(
+    @Req() request: FastifyRequest,
+    @Res({ passthrough: true }) response: FastifyReply,
+  ) {
+    const accessToken = await this.authService.refreshAccessToken(
       request.cookies['refreshToken'] || '',
     );
-    if (!refreshToken) {
+    if (!accessToken) {
       response.clearCookie('refreshToken', this.refreshTokenOptions);
       throw new UnauthorizedException();
     }
+    return { accessToken };
+  }
+
+  @Get('get-session')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: SessionResponseDto })
+  async getSession(
+    @Req() request: FastifyRequest,
+  ): Promise<SessionResponseDto> {
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    const accessToken = type === 'Bearer' ? token : '';
+
+    return this.authService.getSession(accessToken);
   }
 }

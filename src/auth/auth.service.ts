@@ -79,7 +79,7 @@ export class AuthService {
     };
   }
 
-  async refreshAccessToken(refreshToken: string) {
+  async refreshAccessToken(refreshToken: string): Promise<string | null> {
     try {
       const decodedToken: { email: string } =
         await this.asyncVerifyToken(refreshToken);
@@ -94,9 +94,7 @@ export class AuthService {
         throw new UnauthorizedException();
       }
       const newAccessToken = await this.createAccessToken(user);
-      return {
-        accessToken: newAccessToken,
-      };
+      return newAccessToken;
     } catch {
       return null;
     }
@@ -134,6 +132,23 @@ export class AuthService {
     return await this.jwtService.signAsync(payload, {
       expiresIn: '7d',
     });
+  }
+
+  async getSession(accessToken: string): Promise<{ email: string }> {
+    if (!accessToken) {
+      throw new UnauthorizedException();
+    }
+
+    const decodedToken = await this.asyncVerifyToken<{
+      email?: string;
+      roles?: string[];
+    }>(accessToken);
+
+    if (!decodedToken?.email || !Array.isArray(decodedToken.roles)) {
+      throw new UnauthorizedException();
+    }
+
+    return { email: decodedToken.email };
   }
 
   async asyncVerifyToken<T extends object>(token: string) {

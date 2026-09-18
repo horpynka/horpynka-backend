@@ -1,6 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Unique(['username'])
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
@@ -8,9 +7,6 @@ export class User {
 
   @Column({ type: 'character varying', length: 255, unique: true })
   email: string;
-
-  @Column({ type: 'character varying', length: 100 })
-  username: string;
 
   @Column({ type: 'character varying', length: 255 })
   password: string;

@@ -10,6 +10,9 @@ import { IngredientsModule } from './ingredients/ingredients.module';
 import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import { AuthModule } from './auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { GlobalAuthGuard } from './common/guards/global-auth.guard';
 
 @Module({
   imports: [
@@ -43,8 +46,15 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
     UsersModule,
     ProductsModule,
     OrdersModule,
+    AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: GlobalAuthGuard,
+    },
+  ],
 })
 export class AppModule {}

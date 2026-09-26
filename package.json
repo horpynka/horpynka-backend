@@ -22,6 +22,7 @@
     "seed": "ts-node --project tsconfig.seed.json src/database/seed.ts"
   },
   "dependencies": {
+    "@date-fns/tz": "^1.5.0",
     "@fastify/cookie": "11.1.0",
     "@fastify/static": "^10.1.2",
     "@nestjs/common": "^11.0.1",
@@ -37,6 +38,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "cookie-parser": "^1.4.7",
+    "date-fns": "^4.4.0",
     "mysql2": "^3.19.1",
     "pg": "^8.20.0",
     "reflect-metadata": "^0.2.2",

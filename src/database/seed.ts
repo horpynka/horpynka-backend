@@ -11,6 +11,20 @@ import { Ingredient } from '../ingredients/entities/ingredient.entity';
 import { Product } from '../products/entities/product.entity';
 import { Order, OrderStatus } from '../orders/entities/order.entity';
 import { OrderItem } from '../orders/entities/order-item.entity';
+import {
+  CashShift,
+  CashShiftStatus,
+} from '../cash-shifts/entities/cash-shift.entity';
+import {
+  Inventory,
+  InventoryStatus,
+} from '../inventory/entities/inventory.entity';
+import {
+  InventoryItem,
+  MeasurementUnit,
+} from '../inventory/entities/inventory-item.entity';
+import { AUTH_ROLES } from '../common/types/auth';
+import { hashPassword } from '../auth/password.util';
 
 const AppDataSource = new DataSource({
   type: 'postgres',
@@ -28,6 +42,9 @@ const AppDataSource = new DataSource({
     Product,
     Order,
     OrderItem,
+    CashShift,
+    Inventory,
+    InventoryItem,
   ],
   namingStrategy: new SnakeNamingStrategy(),
   synchronize: false,
@@ -41,8 +58,11 @@ async function seed() {
     // Clear in reverse FK-dependency order
     await AppDataSource.query(`
       TRUNCATE TABLE
+        inventory_item,
+        inventory,
         order_item,
         "order",
+        cash_shift,
         dish_ingredient,
         dish,
         product,
@@ -52,6 +72,20 @@ async function seed() {
       RESTART IDENTITY CASCADE;
     `);
     console.log('Cleared existing data.');
+
+    // ── USERS ────────────────────────────────────────────────────────────────
+    const userRepo = AppDataSource.getRepository(User);
+    const cashier = await userRepo.save(
+      userRepo.create({
+        email: 'oleksandr@horpynka.local',
+        password: await hashPassword('password123', 10),
+        roles: [
+          AUTH_ROLES.HORPYNKA_PANEL_ADMIN,
+          AUTH_ROLES.HORPYNKA_CASHIER_USER,
+        ],
+      }),
+    );
+    console.log('Seeded users.');
 
     // ── CATEGORIES ───────────────────────────────────────────────────────────
     const categoryRepo = AppDataSource.getRepository(Category);
@@ -73,16 +107,16 @@ async function seed() {
     // ── INGREDIENTS ──────────────────────────────────────────────────────────
     const ingredientRepo = AppDataSource.getRepository(Ingredient);
     const ingredients = ingredientRepo.create([
-      { measurementUnit: 'г' }, // 1 – м'ясо
-      { measurementUnit: 'г' }, // 2 – картопля
-      { measurementUnit: 'мл' }, // 3 – бульйон
-      { measurementUnit: 'г' }, // 4 – борошно
-      { measurementUnit: 'г' }, // 5 – цибуля
-      { measurementUnit: 'г' }, // 6 – морква
-      { measurementUnit: 'мл' }, // 7 – олія
-      { measurementUnit: 'г' }, // 8 – сіль
-      { measurementUnit: 'г' }, // 9 – перець
-      { measurementUnit: 'мл' }, // 10 – вода
+      { name: "м'ясо", measurementUnit: 'г' },
+      { name: 'картопля', measurementUnit: 'г' },
+      { name: 'бульйон', measurementUnit: 'мл' },
+      { name: 'борошно', measurementUnit: 'г' },
+      { name: 'цибуля', measurementUnit: 'г' },
+      { name: 'морква', measurementUnit: 'г' },
+      { name: 'олія', measurementUnit: 'мл' },
+      { name: 'сіль', measurementUnit: 'г' },
+      { name: 'перець', measurementUnit: 'г' },
+      { name: 'вода', measurementUnit: 'мл' },
     ]);
     await ingredientRepo.save(ingredients);
     console.log('Seeded ingredients.');
@@ -678,9 +712,97 @@ async function seed() {
         createdAt: daysAgo(4),
         updatedAt: daysAgo(4),
       },
+      {
+        orderPrice: 18900,
+        paidWithCash: 18900,
+        paidWithCard: 0,
+        refundedWithCash: 0,
+        refundedWithCard: 0,
+        status: OrderStatus.COMPLETED,
+        createdAt: daysAgo(0),
+        updatedAt: daysAgo(0),
+      },
+      {
+        orderPrice: 12600,
+        paidWithCash: 0,
+        paidWithCard: 12600,
+        refundedWithCash: 0,
+        refundedWithCard: 0,
+        status: OrderStatus.PAID,
+        createdAt: daysAgo(0),
+        updatedAt: daysAgo(0),
+      },
+      {
+        orderPrice: 7500,
+        paidWithCash: 7500,
+        paidWithCard: 0,
+        refundedWithCash: 7500,
+        refundedWithCard: 0,
+        status: OrderStatus.REFUNDED,
+        createdAt: daysAgo(0),
+        updatedAt: daysAgo(0),
+      },
     ]);
     await orderRepo.save(orders);
     console.log('Seeded orders.');
+
+    const cashShiftRepo = AppDataSource.getRepository(CashShift);
+    await cashShiftRepo.save(
+      cashShiftRepo.create({
+        openedAt: new Date(now.getTime() - 4 * 60 * 60 * 1000),
+        closedAt: null,
+        openingBalance: 50000,
+        status: CashShiftStatus.OPEN,
+        openedBy: cashier,
+      }),
+    );
+    console.log('Seeded cash shifts.');
+
+    const item = (
+      name: string,
+      measurementUnit: MeasurementUnit,
+      expectedQuantity: number,
+      actualQuantity: number,
+    ) => ({ name, measurementUnit, expectedQuantity, actualQuantity });
+
+    const inventoryRepo = AppDataSource.getRepository(Inventory);
+    await inventoryRepo.save([
+      inventoryRepo.create({
+        createdAt: new Date(now.getTime() - 2 * 86_400_000),
+        finishedAt: null,
+        status: InventoryStatus.IN_PROGRESS,
+        responsible: 'Марія Коваленко',
+        items: [
+          item('Гречка', MeasurementUnit.G, 5000, 4800),
+          item('Рис', MeasurementUnit.G, 4500, 4500),
+        ],
+      }),
+      inventoryRepo.create({
+        createdAt: new Date(now.getTime() - 6 * 86_400_000),
+        finishedAt: new Date(now.getTime() - 6 * 86_400_000 + 2.5 * 3_600_000),
+        status: InventoryStatus.WITH_DIFFERENCES,
+        responsible: 'Олександр Петренко',
+        items: [
+          item('Гречка', MeasurementUnit.G, 6000, 5800),
+          item('Рис', MeasurementUnit.G, 5000, 5000),
+          item('Картопля', MeasurementUnit.G, 8000, 7500),
+          item('Цибуля', MeasurementUnit.G, 3000, 3000),
+          item('Морква', MeasurementUnit.G, 3500, 3200),
+        ],
+      }),
+      inventoryRepo.create({
+        createdAt: new Date(now.getTime() - 11 * 86_400_000),
+        finishedAt: new Date(now.getTime() - 11 * 86_400_000 + 2 * 3_600_000),
+        status: InventoryStatus.COMPLETED,
+        responsible: 'Марія Коваленко',
+        items: [
+          item('Гречка', MeasurementUnit.G, 5500, 5500),
+          item('Рис', MeasurementUnit.G, 4800, 4800),
+          item('Макарони', MeasurementUnit.G, 3000, 3000),
+        ],
+      }),
+    ]);
+    console.log('Seeded inventories.');
 
     // ── ORDER ITEMS ──────────────────────────────────────────────────────────
     const orderItemRepo = AppDataSource.getRepository(OrderItem);

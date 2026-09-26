@@ -11,6 +11,11 @@ import { UsersModule } from './users/users.module';
 import { ProductsModule } from './products/products.module';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { AuthModule } from './auth/auth.module';
+import { CashShiftsModule } from './cash-shifts/cash-shifts.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { TransactionsModule } from './transactions/transactions.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { MenuModule } from './menu/menu.module';
 import { APP_GUARD } from '@nestjs/core';
 import { GlobalAuthGuard } from './common/guards/global-auth.guard';
 
@@ -46,6 +51,11 @@ import { GlobalAuthGuard } from './common/guards/global-auth.guard';
     UsersModule,
     ProductsModule,
     OrdersModule,
+    DashboardModule,
+    MenuModule,
+    InventoryModule,
+    CashShiftsModule,
+    TransactionsModule,
     AuthModule,
   ],
   controllers: [AppController],

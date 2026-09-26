@@ -8,6 +8,9 @@ import { Ingredient } from '../ingredients/entities/ingredient.entity';
 import { DishIngredient } from '../dishes/entities/dish-ingredient.entity';
 import { Dish } from '../dishes/entities/dish.entity';
 import { Category } from '../categories/entities/category.entity';
+import { CashShift } from '../cash-shifts/entities/cash-shift.entity';
+import { Inventory } from '../inventory/entities/inventory.entity';
+import { InventoryItem } from '../inventory/entities/inventory-item.entity';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 dotenv.config();
@@ -28,6 +31,9 @@ const AppDataSource = new DataSource({
     DishIngredient,
     Dish,
     Category,
+    CashShift,
+    Inventory,
+    InventoryItem,
   ],
   migrations: [
     process.env.NODE_ENV === 'production'

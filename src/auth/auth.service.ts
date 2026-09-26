@@ -113,7 +113,7 @@ export class AuthService {
     };
 
     return await this.jwtService.signAsync(payload, {
-      expiresIn: '7d',
+      expiresIn: '15min',
     });
   }
 

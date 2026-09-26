@@ -21,7 +21,7 @@ jobs:
           node-version: 20
           cache: yarn
 
-      - run: yarn install --frozen-lockfile
+      - run: yarn install
       - run: yarn lint:check
       - run: yarn format:check
       - run: yarn type-check
@@ -37,7 +37,7 @@ jobs:
           node-version: 20
           cache: yarn
 
-      - run: yarn install --frozen-lockfile
+      - run: yarn install
       - run: yarn build
 
   migrations:
@@ -72,7 +72,7 @@ jobs:
           node-version: 20
           cache: yarn
 
-      - run: yarn install --frozen-lockfile
+      - run: yarn install
       - run: yarn migration:run
 
   migrations-prod:
@@ -106,7 +106,7 @@ jobs:
           node-version: 20
           cache: yarn
 
-      - run: yarn install --frozen-lockfile
+      - run: yarn install
       - run: yarn build
       - run: yarn migration:run:prod
         env:

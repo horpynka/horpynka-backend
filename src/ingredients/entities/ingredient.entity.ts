@@ -7,6 +7,9 @@ export class Ingredient {
   id: number;
 
   @Column({ type: 'text' })
+  name: string;
+
+  @Column({ type: 'text' })
   measurementUnit: string;
 
   @OneToMany(() => DishIngredient, (di) => di.ingredient)

@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from './entities/category.entity';
-import { FindAllResponse } from './types';
+import { FindAllCategoriesResponseDto } from './dto/find-all-response.dto';
 
 const categoryFields = {
   id: true,
@@ -29,7 +29,7 @@ export class CategoriesService {
     return category;
   }
 
-  async findAll(): Promise<FindAllResponse> {
+  async findAll(): Promise<FindAllCategoriesResponseDto> {
     const result = await this.categoriesRepository.find({
       relations: {
         dishes: true,

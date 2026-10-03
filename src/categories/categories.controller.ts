@@ -1,8 +1,8 @@
 import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
 import { Category } from './entities/category.entity';
-import { FindAllResponse } from './types';
+import { FindAllCategoriesResponseDto } from './dto/find-all-response.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { AUTH_ROLES } from 'src/common/types/auth';
 
@@ -13,7 +13,8 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Get()
-  findAll(): Promise<FindAllResponse> {
+  @ApiOkResponse({ type: FindAllCategoriesResponseDto })
+  findAll(): Promise<FindAllCategoriesResponseDto> {
     return this.categoriesService.findAll();
   }
 

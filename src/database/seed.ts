@@ -8,7 +8,10 @@ import { Category } from '../categories/entities/category.entity';
 import { Dish } from '../dishes/entities/dish.entity';
 import { DishIngredient } from '../dishes/entities/dish-ingredient.entity';
 import { Ingredient } from '../ingredients/entities/ingredient.entity';
-import { Product } from '../products/entities/product.entity';
+import {
+  Product,
+  ProductMeasurementUnit,
+} from '../products/entities/product.entity';
 import { Order, OrderStatus } from '../orders/entities/order.entity';
 import { OrderItem } from '../orders/entities/order-item.entity';
 import {
@@ -600,6 +603,7 @@ async function seed() {
       },
     ]);
     for (const product of products) {
+      product.measurementUnit = ProductMeasurementUnit.PCS;
       product.createdAt = today;
       product.updatedAt = today;
     }

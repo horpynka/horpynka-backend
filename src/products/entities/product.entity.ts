@@ -7,6 +7,12 @@ import {
 } from 'typeorm';
 import { Category } from '../../categories/entities/category.entity';
 
+export enum ProductMeasurementUnit {
+  G = 'g',
+  ML = 'ml',
+  PCS = 'pcs',
+}
+
 @Entity('product')
 export class Product {
   @PrimaryGeneratedColumn()
@@ -20,6 +26,13 @@ export class Product {
 
   @Column({ type: 'integer' })
   sellingPrice: number;
+
+  @Column({
+    type: 'enum',
+    enum: ProductMeasurementUnit,
+    enumName: 'product_measurement_unit_enum',
+  })
+  measurementUnit: ProductMeasurementUnit;
 
   @Column({ name: 'category_id', nullable: true })
   categoryId: number | null;

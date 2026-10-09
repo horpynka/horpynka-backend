@@ -1,7 +1,15 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Product } from './entities/product.entity';
 import { ProductsService } from './products.service';
+import { CreateProductDto } from './dto/create-product.dto';
 import { AUTH_ROLES } from 'src/common/types/auth';
 import { Roles } from 'src/common/decorators/roles.decorator';
 
@@ -10,6 +18,12 @@ import { Roles } from 'src/common/decorators/roles.decorator';
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
+
+  @Post()
+  @Roles(AUTH_ROLES.HORPYNKA_PANEL_ADMIN)
+  create(@Body() createProductDto: CreateProductDto): Promise<Product> {
+    return this.productsService.create(createProductDto);
+  }
 
   @Get()
   findAll(): Promise<Product[]> {

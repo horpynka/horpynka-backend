@@ -1,6 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CreateIngredientDto } from './dto/create-ingredient.dto';
 import { Ingredient } from './entities/ingredient.entity';
 
 const ingredientFields = {
@@ -9,12 +14,26 @@ const ingredientFields = {
   measurementUnit: true,
 } as const;
 
+const DUPLICATE_INGREDIENT_NAME = 'Інгредієнт з такою назвою вже існує';
+
 @Injectable()
 export class IngredientsService {
   constructor(
     @InjectRepository(Ingredient)
     private readonly ingredientsRepository: Repository<Ingredient>,
   ) {}
+
+  async create(createIngredientDto: CreateIngredientDto): Promise<Ingredient> {
+    await this.assertUniqueName(createIngredientDto.name);
+
+    const ingredient = this.ingredientsRepository.create({
+      name: createIngredientDto.name,
+      measurementUnit: createIngredientDto.measurementUnit,
+    });
+    const saved = await this.ingredientsRepository.save(ingredient);
+
+    return this.findOne(saved.id);
+  }
 
   findAll(): Promise<Ingredient[]> {
     return this.ingredientsRepository.find({
@@ -34,5 +53,19 @@ export class IngredientsService {
     }
 
     return ingredient;
+  }
+
+  private async assertUniqueName(name: string): Promise<void> {
+    const normalizedName = name.trim().toLowerCase();
+    const ingredients = await this.ingredientsRepository.find({
+      select: { id: true, name: true },
+    });
+    const duplicate = ingredients.find(
+      (ingredient) => ingredient.name.trim().toLowerCase() === normalizedName,
+    );
+
+    if (duplicate) {
+      throw new ConflictException(DUPLICATE_INGREDIENT_NAME);
+    }
   }
 }

@@ -12,11 +12,13 @@ export class CreateIngredientDto {
   @Transform(({ value }: { value: unknown }) =>
     typeof value === 'string' ? value.trim() : value,
   )
-  @IsString()
-  @IsNotEmpty()
+  @IsString({ message: 'Назва має бути рядком' })
+  @IsNotEmpty({ message: 'Назва не може бути порожньою' })
   name: string;
 
   /** @example g */
-  @IsEnum(IngredientMeasurementUnit)
+  @IsEnum(IngredientMeasurementUnit, {
+    message: 'Одиниця виміру має бути однією з: g, ml, pcs',
+  })
   measurementUnit: IngredientMeasurementUnit;
 }

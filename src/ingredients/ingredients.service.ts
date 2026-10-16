@@ -17,6 +17,8 @@ const ingredientFields = {
   measurementUnit: true,
 } as const;
 
+const DUPLICATE_INGREDIENT_NAME = 'Інгредієнт з такою назвою вже існує';
+
 @Injectable()
 export class IngredientsService {
   constructor(
@@ -25,20 +27,7 @@ export class IngredientsService {
   ) {}
 
   async create(createIngredientDto: CreateIngredientDto): Promise<Ingredient> {
-    const normalizedName = createIngredientDto.name
-      .trim()
-      .toLocaleLowerCase('uk-UA');
-    const existing = await this.ingredientsRepository.find({
-      select: { id: true, name: true },
-    });
-    const duplicate = existing.some(
-      (ingredient) =>
-        ingredient.name.trim().toLocaleLowerCase('uk-UA') === normalizedName,
-    );
-
-    if (duplicate) {
-      throw new ConflictException(INGREDIENT_NAME_TAKEN_MESSAGE);
-    }
+    await this.assertUniqueName(createIngredientDto.name);
 
     const ingredient = this.ingredientsRepository.create({
       name: createIngredientDto.name,
@@ -67,5 +56,19 @@ export class IngredientsService {
     }
 
     return ingredient;
+  }
+
+  private async assertUniqueName(name: string): Promise<void> {
+    const normalizedName = name.trim().toLowerCase();
+    const ingredients = await this.ingredientsRepository.find({
+      select: { id: true, name: true },
+    });
+    const duplicate = ingredients.find(
+      (ingredient) => ingredient.name.trim().toLowerCase() === normalizedName,
+    );
+
+    if (duplicate) {
+      throw new ConflictException(DUPLICATE_INGREDIENT_NAME);
+    }
   }
 }

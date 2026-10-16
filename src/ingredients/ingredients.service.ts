@@ -8,6 +8,9 @@ import { Repository } from 'typeorm';
 import { CreateIngredientDto } from './dto/create-ingredient.dto';
 import { Ingredient } from './entities/ingredient.entity';
 
+export const INGREDIENT_NAME_TAKEN_MESSAGE =
+  'Інгредієнт з такою назвою вже існує';
+
 const ingredientFields = {
   id: true,
   name: true,

@@ -12,6 +12,10 @@ export class Ingredient {
   @Column({ type: 'text' })
   measurementUnit: string;
 
+  /** Current remainder in `measurementUnit`. Snapshotted when a check starts. */
+  @Column({ type: 'integer', default: 0 })
+  stockQuantity: number;
+
   @OneToMany(() => DishIngredient, (di) => di.ingredient)
   dishIngredients: DishIngredient[];
 }

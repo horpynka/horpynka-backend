@@ -110,16 +110,16 @@ async function seed() {
     // ── INGREDIENTS ──────────────────────────────────────────────────────────
     const ingredientRepo = AppDataSource.getRepository(Ingredient);
     const ingredients = ingredientRepo.create([
-      { name: "м'ясо", measurementUnit: 'г' },
-      { name: 'картопля', measurementUnit: 'г' },
-      { name: 'бульйон', measurementUnit: 'мл' },
-      { name: 'борошно', measurementUnit: 'г' },
-      { name: 'цибуля', measurementUnit: 'г' },
-      { name: 'морква', measurementUnit: 'г' },
-      { name: 'олія', measurementUnit: 'мл' },
-      { name: 'сіль', measurementUnit: 'г' },
-      { name: 'перець', measurementUnit: 'г' },
-      { name: 'вода', measurementUnit: 'мл' },
+      { name: "м'ясо", measurementUnit: 'g', stockQuantity: 8000 },
+      { name: 'картопля', measurementUnit: 'g', stockQuantity: 12000 },
+      { name: 'бульйон', measurementUnit: 'ml', stockQuantity: 5000 },
+      { name: 'борошно', measurementUnit: 'g', stockQuantity: 10000 },
+      { name: 'цибуля', measurementUnit: 'g', stockQuantity: 3000 },
+      { name: 'морква', measurementUnit: 'g', stockQuantity: 2500 },
+      { name: 'олія', measurementUnit: 'ml', stockQuantity: 2000 },
+      { name: 'сіль', measurementUnit: 'g', stockQuantity: 1000 },
+      { name: 'перець', measurementUnit: 'g', stockQuantity: 200 },
+      { name: 'вода', measurementUnit: 'ml', stockQuantity: 15000 },
     ]);
     await ingredientRepo.save(ingredients);
     console.log('Seeded ingredients.');
@@ -602,8 +602,23 @@ async function seed() {
         selling: true,
       },
     ]);
+    const trackedStock: Record<
+      string,
+      { unit: ProductMeasurementUnit; stockQuantity: number }
+    > = {
+      Кола: { unit: ProductMeasurementUnit.PCS, stockQuantity: 24 },
+      'Сік апельсиновий': {
+        unit: ProductMeasurementUnit.ML,
+        stockQuantity: 5000,
+      },
+      Чіпси: { unit: ProductMeasurementUnit.G, stockQuantity: 750 },
+      'Горішки солоні': { unit: ProductMeasurementUnit.PCS, stockQuantity: 0 },
+    };
+
     for (const product of products) {
-      product.measurementUnit = ProductMeasurementUnit.PCS;
+      const tracked = trackedStock[product.name];
+      product.measurementUnit = tracked?.unit ?? ProductMeasurementUnit.PCS;
+      product.stockQuantity = tracked ? tracked.stockQuantity : null;
       product.createdAt = today;
       product.updatedAt = today;
     }
@@ -766,7 +781,7 @@ async function seed() {
       name: string,
       measurementUnit: MeasurementUnit,
       expectedQuantity: number,
-      actualQuantity: number,
+      actualQuantity: number | null,
     ) => ({ name, measurementUnit, expectedQuantity, actualQuantity });
 
     const inventoryRepo = AppDataSource.getRepository(Inventory);
@@ -777,8 +792,8 @@ async function seed() {
         status: InventoryStatus.IN_PROGRESS,
         responsible: 'Марія Коваленко',
         items: [
-          item('Гречка', MeasurementUnit.G, 5000, 4800),
-          item('Рис', MeasurementUnit.G, 4500, 4500),
+          item('Гречка', MeasurementUnit.G, 5000, null),
+          item('Рис', MeasurementUnit.G, 4500, null),
         ],
       }),
       inventoryRepo.create({

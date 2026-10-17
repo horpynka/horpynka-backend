@@ -34,6 +34,13 @@ export class Product {
   })
   measurementUnit: ProductMeasurementUnit;
 
+  /**
+   * Quantitative remainder in `measurementUnit`.
+   * Null means the product is not tracked by quantity and is left out of inventory checks.
+   */
+  @Column({ type: 'integer', nullable: true })
+  stockQuantity: number | null;
+
   @Column({ name: 'category_id', nullable: true })
   categoryId: number | null;
 

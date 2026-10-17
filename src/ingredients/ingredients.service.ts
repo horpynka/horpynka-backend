@@ -23,6 +23,7 @@ const ingredientFields = {
   id: true,
   name: true,
   measurementUnit: true,
+  stockQuantity: true,
 } as const;
 
 @Injectable()
@@ -40,6 +41,7 @@ export class IngredientsService {
     const ingredient = this.ingredientsRepository.create({
       name: createIngredientDto.name,
       measurementUnit: createIngredientDto.measurementUnit,
+      stockQuantity: 0,
     });
     const saved = await this.ingredientsRepository.save(ingredient);
 

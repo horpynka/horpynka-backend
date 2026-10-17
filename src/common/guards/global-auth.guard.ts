@@ -52,14 +52,21 @@ export class GlobalAuthGuard implements CanActivate {
         throw new UnauthorizedException();
       }
 
-      const hasPermission = requiredRoles.every((role) => {
-        return decodedAccessToken.roles.includes(role);
-      });
+      const userRoles = Array.isArray(decodedAccessToken.roles)
+        ? decodedAccessToken.roles
+        : [];
+      const hasPermission = requiredRoles.some((role) =>
+        userRoles.includes(role),
+      );
 
       if (!hasPermission) {
         throw new ForbiddenException();
       }
-    } catch {
+    } catch (error) {
+      if (error instanceof ForbiddenException) {
+        throw error;
+      }
+
       throw new UnauthorizedException();
     }
     return true;

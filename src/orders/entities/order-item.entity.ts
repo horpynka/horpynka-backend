@@ -10,6 +10,12 @@ import { Order } from './order.entity';
 import { Dish } from '../../dishes/entities/dish.entity';
 import { Product } from '../../products/entities/product.entity';
 
+export enum DiscountType {
+  NONE = 'NONE',
+  PERCENT = 'PERCENT',
+  AMOUNT = 'AMOUNT',
+}
+
 @Check(
   `(("dish_id" IS NOT NULL AND "product_id" IS NULL) OR ("dish_id" IS NULL AND "product_id" IS NOT NULL))`,
 )
@@ -24,8 +30,8 @@ export class OrderItem {
   @Column({ type: 'text', nullable: true })
   discount: string | null;
 
-  @Column({ type: 'text' })
-  discountType: string;
+  @Column({ type: 'text', default: DiscountType.NONE })
+  discountType: DiscountType;
 
   @Column({ name: 'dish_id', nullable: true })
   dishId: number | null;

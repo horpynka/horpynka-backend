@@ -26,6 +26,10 @@ export class CashShift {
   @Column({ type: 'integer' })
   openingBalance: number;
 
+  /** Recorded when the shift is closed. Null while the shift is open. */
+  @Column({ type: 'integer', nullable: true })
+  closingBalance: number | null;
+
   @Column({
     type: 'enum',
     enum: CashShiftStatus,

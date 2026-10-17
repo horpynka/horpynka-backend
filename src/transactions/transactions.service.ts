@@ -1,7 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, type Repository } from 'typeorm';
-import { toIsoUtcString } from '../common/utils/date';
+import type { Repository } from 'typeorm';
+import {
+  getKyivInclusiveRange,
+  InvalidKyivDateError,
+  parseKyivDate,
+  startOfKyivDay,
+  toIsoUtcString,
+} from '../common/utils/date';
 import { Order, OrderStatus } from '../orders/entities/order.entity';
 import {
   PaymentMethod,
@@ -9,6 +15,7 @@ import {
   TransactionKind,
   TransactionOrderStatus,
 } from './dto/transaction.dto';
+import type { TransactionsQueryDto } from './dto/transactions-query.dto';
 
 const TRANSACTION_STATUSES = [
   OrderStatus.PAID,
@@ -23,23 +30,67 @@ export class TransactionsService {
     private readonly orderRepository: Repository<Order>,
   ) {}
 
-  async findAll(): Promise<TransactionDto[]> {
-    const orders = await this.orderRepository.find({
-      where: { status: In(TRANSACTION_STATUSES) },
-      select: {
-        id: true,
-        status: true,
-        createdAt: true,
-        orderPrice: true,
-        paidWithCash: true,
-        paidWithCard: true,
-        refundedWithCash: true,
-        refundedWithCard: true,
-      },
-      order: { createdAt: 'DESC' },
-    });
+  async findAll(query: TransactionsQueryDto = {}): Promise<TransactionDto[]> {
+    const { start, end } = resolveCreatedAtRange(query);
 
+    const ordersQuery = this.orderRepository
+      .createQueryBuilder('order')
+      .select([
+        'order.id',
+        'order.status',
+        'order.createdAt',
+        'order.orderPrice',
+        'order.paidWithCash',
+        'order.paidWithCard',
+        'order.refundedWithCash',
+        'order.refundedWithCard',
+      ])
+      .where('order.status IN (:...statuses)', {
+        statuses: TRANSACTION_STATUSES,
+      })
+      .orderBy('order.createdAt', 'DESC');
+
+    if (start) {
+      ordersQuery.andWhere('order.createdAt >= :start', { start });
+    }
+    if (end) {
+      ordersQuery.andWhere('order.createdAt < :end', { end });
+    }
+
+    const orders = await ordersQuery.getMany();
     return orders.map(toDto);
+  }
+}
+
+function resolveCreatedAtRange(query: TransactionsQueryDto): {
+  start?: Date;
+  end?: Date;
+} {
+  const { from, to } = query;
+  if (!from && !to) {
+    return {};
+  }
+
+  try {
+    if (from && to) {
+      const range = getKyivInclusiveRange(from, to);
+      return { start: range.start, end: range.end };
+    }
+
+    if (from) {
+      return { start: startOfKyivDay(parseKyivDate(from)) };
+    }
+
+    if (to) {
+      return { end: getKyivInclusiveRange(to, to).end };
+    }
+
+    return {};
+  } catch (error) {
+    if (error instanceof InvalidKyivDateError) {
+      throw new BadRequestException(error.message);
+    }
+    throw error;
   }
 }
 

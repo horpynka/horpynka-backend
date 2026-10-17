@@ -1,14 +1,28 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import type { Repository } from 'typeorm';
-import { formatKyivDate, getKyivDateWindow } from '../common/utils/date';
+import {
+  formatKyivDate,
+  getKyivDateWindow,
+  getKyivInclusiveRange,
+  InvalidKyivDateError,
+} from '../common/utils/date';
 import { CashShiftsService } from '../cash-shifts/cash-shifts.service';
 import { Order, OrderStatus } from '../orders/entities/order.entity';
+import type { DashboardStatsQueryDto } from './dto/dashboard-stats-query.dto';
 import type {
   DashboardStatsDto,
   PaymentSplitDto,
   SalesByDayDto,
 } from './dto/dashboard-stats.dto';
+
+interface DashboardPeriod {
+  dates: string[];
+  start: Date;
+  end: Date;
+  /** When set, headline metrics use only this Kyiv date. Bars still use `dates`. */
+  metricDate: string | null;
+}
 
 const COMPLETED_SALE_STATUSES = new Set<OrderStatus>([
   OrderStatus.PAID,
@@ -23,42 +37,46 @@ export class DashboardService {
     private readonly cashShiftsService: CashShiftsService,
   ) {}
 
-  async getStats(): Promise<DashboardStatsDto> {
-    const { today, dates, start, end } = getKyivDateWindow(7);
+  async getStats(
+    query: DashboardStatsQueryDto = {},
+  ): Promise<DashboardStatsDto> {
+    const period = this.resolvePeriod(query);
 
     const [windowOrders, currentShift] = await Promise.all([
       this.orderRepository
         .createQueryBuilder('order')
         .where('order.createdAt >= :start AND order.createdAt < :end', {
-          start,
-          end,
+          start: period.start,
+          end: period.end,
         })
         .getMany(),
       this.cashShiftsService.findCurrent(),
     ]);
 
-    const todayOrders = windowOrders.filter(
-      (order) => formatKyivDate(order.createdAt) === today,
-    );
-    const completedToday = todayOrders.filter((order) =>
+    const metricOrders = period.metricDate
+      ? windowOrders.filter(
+          (order) => formatKyivDate(order.createdAt) === period.metricDate,
+        )
+      : windowOrders;
+    const completedSales = metricOrders.filter((order) =>
       isCompletedSale(order.status),
     );
-    const todaySales = sumBy(completedToday, (order) => order.orderPrice);
-    const ordersCount = completedToday.length;
-    const cashSales = sumBy(todayOrders, (order) => order.paidWithCash);
-    const cardSales = sumBy(todayOrders, (order) => order.paidWithCard);
+    const todaySales = sumBy(completedSales, (order) => order.orderPrice);
+    const ordersCount = completedSales.length;
+    const cashSales = sumBy(metricOrders, (order) => order.paidWithCash);
+    const cardSales = sumBy(metricOrders, (order) => order.paidWithCard);
     const refunds = sumBy(
-      todayOrders,
+      metricOrders,
       (order) => order.refundedWithCash + order.refundedWithCard,
     );
 
     return {
       todaySales,
       ordersCount,
-      openOrders: todayOrders.filter(
+      openOrders: metricOrders.filter(
         (order) => order.status === OrderStatus.CREATED,
       ).length,
-      closedOrders: todayOrders.filter(
+      closedOrders: metricOrders.filter(
         (order) => order.status === OrderStatus.COMPLETED,
       ).length,
       cashSales,
@@ -66,9 +84,34 @@ export class DashboardService {
       refunds,
       averageOrder: averageKopecks(todaySales, ordersCount),
       currentShift,
-      salesByDay: buildSalesByDay(windowOrders, dates),
+      salesByDay: buildSalesByDay(windowOrders, period.dates),
       paymentSplit: buildPaymentSplit(cashSales, cardSales),
     };
+  }
+
+  private resolvePeriod(query: DashboardStatsQueryDto): DashboardPeriod {
+    if (!query.from && !query.to) {
+      const window = getKyivDateWindow(7);
+      return {
+        dates: window.dates,
+        start: window.start,
+        end: window.end,
+        metricDate: window.today,
+      };
+    }
+
+    const today = formatKyivDate(new Date());
+    const from = query.from ?? query.to ?? today;
+    const to = query.to ?? query.from ?? today;
+
+    try {
+      return { ...getKyivInclusiveRange(from, to), metricDate: null };
+    } catch (error) {
+      if (error instanceof InvalidKyivDateError) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
+    }
   }
 }
 

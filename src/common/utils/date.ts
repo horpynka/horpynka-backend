@@ -41,6 +41,65 @@ export function toIsoUtcString(date: Date): string {
   return format(date, "yyyy-MM-dd'T'HH:mm:ss'Z'", { in: utc });
 }
 
+const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+export class InvalidKyivDateError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidKyivDateError';
+  }
+}
+
+/** Calendar date `YYYY-MM-DD` interpreted in Europe/Kyiv. */
+export function parseKyivDate(value: string): Date {
+  const match = ISO_DATE.exec(value);
+  if (!match) {
+    throw new InvalidKyivDateError(`Invalid date: ${value}`);
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const utcNoon = new Date(Date.UTC(year, month - 1, day, 12));
+  if (
+    utcNoon.getUTCFullYear() !== year ||
+    utcNoon.getUTCMonth() !== month - 1 ||
+    utcNoon.getUTCDate() !== day
+  ) {
+    throw new InvalidKyivDateError(`Invalid date: ${value}`);
+  }
+
+  return utcNoon;
+}
+
+/** Inclusive Kyiv calendar range. `end` is exclusive (start of the next day). */
+export function getKyivInclusiveRange(
+  from: string,
+  to: string,
+): {
+  dates: string[];
+  start: Date;
+  end: Date;
+} {
+  const fromKey = formatKyivDate(parseKyivDate(from));
+  const toKey = formatKyivDate(parseKyivDate(to));
+  if (fromKey > toKey) {
+    throw new InvalidKyivDateError('from must not be after to');
+  }
+
+  const start = startOfKyivDay(parseKyivDate(from));
+  const endInclusive = startOfKyivDay(parseKyivDate(to));
+  const end = toUtcDate(addDays(endInclusive, 1, { in: kyiv }));
+
+  return {
+    dates: eachDayOfInterval({ start, end: endInclusive }, { in: kyiv }).map(
+      formatKyivDate,
+    ),
+    start,
+    end,
+  };
+}
+
 function toUtcDate(date: Date): Date {
   return new Date(date.getTime());
 }

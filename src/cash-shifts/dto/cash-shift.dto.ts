@@ -22,8 +22,26 @@ export class CashShiftDto {
   /** @example 7500 */
   refunds: number;
 
-  /** @example 162500 */
+  /**
+   * Expected cash in the drawer: opening balance plus cash sales, minus cash refunds.
+   * @example 162500
+   */
   closingBalance: number;
+
+  /**
+   * Cash counted in the drawer at close, in kopecks.
+   * Null while the shift is open.
+   * @example 162000
+   */
+  actualClosingBalance: number | null;
+
+  /**
+   * `actualClosingBalance` minus `closingBalance`, in kopecks.
+   * Positive when the drawer holds more cash than expected.
+   * Null while the shift is open.
+   * @example -500
+   */
+  difference: number | null;
 
   /** @example 25 */
   ordersCount: number;

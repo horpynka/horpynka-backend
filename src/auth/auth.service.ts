@@ -11,7 +11,9 @@ import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
 import { SignInUserDTO } from './dto/sign-in-user.dto';
 import { SignUpUserDTO } from './dto/sign-up-user.dto';
+import { SessionResponseDto } from './dto/session-response.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { isAuthRole } from 'src/common/types/auth';
 
 @ApiTags('auth')
 @Injectable()
@@ -134,7 +136,7 @@ export class AuthService {
     });
   }
 
-  async getSession(accessToken: string): Promise<{ email: string }> {
+  async getSession(accessToken: string): Promise<SessionResponseDto> {
     if (!accessToken) {
       throw new UnauthorizedException();
     }
@@ -148,7 +150,10 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    return { email: decodedToken.email };
+    return {
+      email: decodedToken.email,
+      roles: decodedToken.roles.filter(isAuthRole),
+    };
   }
 
   async asyncVerifyToken<T extends object>(token: string) {

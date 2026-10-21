@@ -14,8 +14,11 @@ export class InventoryItemDto {
   /** @example 5000 */
   expectedQuantity: number;
 
-  /** @example 4800 */
-  actualQuantity: number;
+  /**
+   * Empty until the counted amount is saved.
+   * @example 4800
+   */
+  actualQuantity: number | null;
 }
 
 export class InventoryDto {

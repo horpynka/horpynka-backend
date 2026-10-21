@@ -27,8 +27,8 @@ export class InventoryItem {
   @Column({ type: 'integer' })
   expectedQuantity: number;
 
-  @Column({ type: 'integer' })
-  actualQuantity: number;
+  @Column({ type: 'integer', nullable: true })
+  actualQuantity: number | null;
 
   @Column({ name: 'inventory_id' })
   inventoryId: number;

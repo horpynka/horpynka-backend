@@ -60,7 +60,7 @@ export class ProductsService {
     });
 
     if (!product) {
-      throw new NotFoundException(`Product #${id} not found`);
+      throw new NotFoundException(`Товар #${id} не знайдено`);
     }
 
     return product;

@@ -77,7 +77,7 @@ export class OrdersService {
       },
     });
     if (!order) {
-      throw new NotFoundException(`Order #${id} not found`);
+      throw new NotFoundException(`Замовлення #${id} не знайдено`);
     }
     return order;
   }

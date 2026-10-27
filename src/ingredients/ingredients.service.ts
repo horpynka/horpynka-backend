@@ -62,7 +62,7 @@ export class IngredientsService {
     });
 
     if (!ingredient) {
-      throw new NotFoundException(`Ingredient #${id} not found`);
+      throw new NotFoundException(`Інгредієнт #${id} не знайдено`);
     }
 
     return ingredient;

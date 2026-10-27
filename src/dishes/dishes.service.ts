@@ -97,7 +97,7 @@ export class DishesService {
       },
     });
     if (!dish) {
-      throw new NotFoundException(`Dish #${id} not found`);
+      throw new NotFoundException(`Страву #${id} не знайдено`);
     }
     return dish;
   }
@@ -120,7 +120,7 @@ export class DishesService {
         updatedAt: new Date(),
       });
       if (!updated.affected) {
-        throw new NotFoundException(`Dish #${id} not found`);
+        throw new NotFoundException(`Страву #${id} не знайдено`);
       }
 
       await manager.delete(DishIngredient, { dishId: id });
@@ -155,7 +155,7 @@ export class DishesService {
         await manager.delete(DishIngredient, { dishId: id });
         const deleted = await manager.delete(Dish, id);
         if (!deleted.affected) {
-          throw new NotFoundException(`Dish #${id} not found`);
+          throw new NotFoundException(`Страву #${id} не знайдено`);
         }
       });
     } catch (error) {
@@ -188,7 +188,7 @@ export class DishesService {
     const missingIds = ingredientIds.filter((id) => !existingIds.has(id));
     if (missingIds.length > 0) {
       throw new NotFoundException(
-        `Ingredients ${missingIds.map((ingredientId) => `#${ingredientId}`).join(', ')} not found`,
+        `Інгредієнти ${missingIds.map((ingredientId) => `#${ingredientId}`).join(', ')} не знайдено`,
       );
     }
   }

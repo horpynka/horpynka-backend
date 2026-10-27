@@ -87,7 +87,7 @@ export class CashShiftsService {
       });
 
       if (!shift) {
-        throw new NotFoundException(`Cash shift #${id} not found`);
+        throw new NotFoundException(`Зміну #${id} не знайдено`);
       }
 
       if (shift.status !== CashShiftStatus.OPEN) {
@@ -133,7 +133,7 @@ export class CashShiftsService {
     });
 
     if (!shift) {
-      throw new NotFoundException(`Cash shift #${id} not found`);
+      throw new NotFoundException(`Зміну #${id} не знайдено`);
     }
 
     const [dto] = await this.mapShifts([shift]);

@@ -27,7 +27,7 @@ export class AuthService {
   async signIn(data: SignInUserDTO) {
     const user = await this.usersService.findOne(data);
     if (!user) {
-      throw new UnauthorizedException('Such a user does not exist');
+      throw new UnauthorizedException('Неправильний email або пароль');
     }
 
     const passwordIsCorrect = await comparePasswords(
@@ -36,7 +36,7 @@ export class AuthService {
     );
 
     if (!passwordIsCorrect) {
-      throw new UnauthorizedException('Username or password is wrong');
+      throw new UnauthorizedException('Неправильний email або пароль');
     }
 
     return await this.createJwtTokens(user);
@@ -71,7 +71,7 @@ export class AuthService {
     const refreshToken = await this.createRefreshToken(user);
     if (!accessToken || !refreshToken) {
       throw new InternalServerErrorException(
-        'Failed to create tokens for authentication',
+        'Не вдалося створити токени для автентифікації',
       );
     }
 

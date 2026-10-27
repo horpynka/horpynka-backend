@@ -54,7 +54,7 @@ export class InvalidKyivDateError extends Error {
 export function parseKyivDate(value: string): Date {
   const match = ISO_DATE.exec(value);
   if (!match) {
-    throw new InvalidKyivDateError(`Invalid date: ${value}`);
+    throw new InvalidKyivDateError(`Некоректна дата: ${value}`);
   }
 
   const year = Number(match[1]);
@@ -66,7 +66,7 @@ export function parseKyivDate(value: string): Date {
     utcNoon.getUTCMonth() !== month - 1 ||
     utcNoon.getUTCDate() !== day
   ) {
-    throw new InvalidKyivDateError(`Invalid date: ${value}`);
+    throw new InvalidKyivDateError(`Некоректна дата: ${value}`);
   }
 
   return utcNoon;
@@ -84,7 +84,7 @@ export function getKyivInclusiveRange(
   const fromKey = formatKyivDate(parseKyivDate(from));
   const toKey = formatKyivDate(parseKyivDate(to));
   if (fromKey > toKey) {
-    throw new InvalidKyivDateError('from must not be after to');
+    throw new InvalidKyivDateError('Дата «від» не може бути пізніше за «до»');
   }
 
   const start = startOfKyivDay(parseKyivDate(from));

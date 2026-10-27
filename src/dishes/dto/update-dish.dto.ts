@@ -59,7 +59,7 @@ export class UpdateDishDto {
   @ArrayUnique(
     (ingredient: UpdateDishIngredientDto | undefined) =>
       ingredient?.ingredientId,
-    { message: 'ingredients must not contain the same ingredient twice' },
+    { message: 'Склад не може містити той самий інгредієнт двічі' },
   )
   @ValidateNested({ each: true })
   @Type(() => UpdateDishIngredientDto)

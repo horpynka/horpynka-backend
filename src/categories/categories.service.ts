@@ -46,7 +46,7 @@ export class CategoriesService {
     });
 
     if (!category) {
-      throw new NotFoundException(`Category #${id} not found`);
+      throw new NotFoundException(`Категорію #${id} не знайдено`);
     }
 
     return category;

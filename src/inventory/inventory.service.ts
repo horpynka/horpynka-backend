@@ -49,7 +49,7 @@ export class InventoryService {
     });
 
     if (!inventory) {
-      throw new NotFoundException(`Inventory #${id} not found`);
+      throw new NotFoundException(`Перевірку #${id} не знайдено`);
     }
 
     return toDto(inventory);
@@ -167,7 +167,7 @@ export class InventoryService {
     });
 
     if (!inventory) {
-      throw new NotFoundException(`Inventory #${id} not found`);
+      throw new NotFoundException(`Перевірку #${id} не знайдено`);
     }
 
     return inventory;

@@ -123,7 +123,7 @@ function parseMenuItemId(id: string): {
   const match = MENU_ITEM_ID.exec(id);
   if (!match) {
     throw new BadRequestException(
-      'Menu item id must look like dish-12 or product-4',
+      'Ідентифікатор позиції меню має виглядати як dish-12 або product-4',
     );
   }
 
@@ -134,8 +134,8 @@ function parseMenuItemId(id: string): {
 }
 
 function notFoundMessage(kind: MenuItemKind, entityId: number): string {
-  const label = kind === 'DISH' ? 'Dish' : 'Product';
-  return `${label} #${entityId} not found`;
+  const label = kind === 'DISH' ? 'Страву' : 'Товар';
+  return `${label} #${entityId} не знайдено`;
 }
 
 function toMenuItem(kind: MenuItemKind, item: Sellable): MenuItemDto {
